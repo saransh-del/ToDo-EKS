@@ -66,6 +66,13 @@ jobs:
           --set serviceAccount.create=true \
           --set serviceAccount.name=aws-load-balancer-controller
 
+    - name: Debug workspace structure
+      run: |
+        echo "Current directory:"
+        pwd
+        echo "List files:"
+        ls -R
+
     # ---------------- DATABASE ----------------
     - name: Deploy Database
       run: |
