@@ -66,34 +66,28 @@ jobs:
           --set serviceAccount.create=true \
           --set serviceAccount.name=aws-load-balancer-controller
 
-    - name: Debug workspace structure
-      run: |
-        echo "Current directory:"
-        pwd
-        echo "List files:"
-        ls -R
 
     # ---------------- DATABASE ----------------
     - name: Deploy Database
       run: |
-        kubectl apply -f ToDo-EKS/Kubernetes-Manifests-file/Database/secrets.yaml
-        kubectl apply -f ToDo-EKS/Kubernetes-Manifests-file/Database/pvc.yaml
-        kubectl apply -f ToDo-EKS/Kubernetes-Manifests-file/Database/deployment.yaml
-        kubectl apply -f ToDo-EKS/Kubernetes-Manifests-file/Database/service.yaml
+        kubectl apply -f Kubernetes-Manifests-file/Database/secrets.yaml
+        kubectl apply -f Kubernetes-Manifests-file/Database/pvc.yaml
+        kubectl apply -f Kubernetes-Manifests-file/Database/deployment.yaml
+        kubectl apply -f Kubernetes-Manifests-file/Database/service.yaml
 
     # ---------------- BACKEND ----------------
     - name: Deploy Backend
       run: |
-        kubectl apply -f ToDo-EKS/Kubernetes-Manifests-file/Backend/deployment.yaml
-        kubectl apply -f ToDo-EKS/Kubernetes-Manifests-file/Backend/service.yaml
+        kubectl apply -f Kubernetes-Manifests-file/Backend/deployment.yaml
+        kubectl apply -f Kubernetes-Manifests-file/Backend/service.yaml
         kubectl rollout status deployment/backend --timeout=300s
 
     # ---------------- FRONTEND ----------------
     - name: Deploy Frontend
       run: |
-        kubectl apply -f ToDo-EKS/Kubernetes-Manifests-file/Frontend/deployment.yaml
-        kubectl apply -f ToDo-EKS/Kubernetes-Manifests-file/Frontend/service.yaml
-        kubectl apply -f ToDo-EKS/Kubernetes-Manifests-file/ingress.yaml
+        kubectl apply -f Kubernetes-Manifests-file/Frontend/deployment.yaml
+        kubectl apply -f Kubernetes-Manifests-file/Frontend/service.yaml
+        kubectl apply -f Kubernetes-Manifests-file/ingress.yaml
         kubectl rollout status deployment/frontend --timeout=300s
 
     # ---------------- VERIFY ----------------
