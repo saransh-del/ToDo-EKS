@@ -38,11 +38,7 @@ jobs:
           --region $AWS_REGION \
           --name $EKS_CLUSTER_NAME
 
-    # ---------------- NAMESPACE ----------------
-    - name: Create namespace
-      run: |
-        kubectl create namespace $NAMESPACE \
-          --dry-run=client -o yaml | kubectl apply -f -
+    
 
     # ---------------- DATABASE ----------------
     - name: Deploy Database
