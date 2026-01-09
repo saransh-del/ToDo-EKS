@@ -38,12 +38,21 @@ jobs:
           --region $AWS_REGION \
           --name $EKS_CLUSTER_NAME
 
-    
+    # ---------------- NAMESPACE ----------------
+    - name: Ensure namespace exists
+      run: |
+        kubectl create namespace $NAMESPACE --dry-run=client -o yaml | kubectl apply -f -
+
+    # ---------------- DATABASE (SECRETS FLOW) ----------------
+    - name: Deploy MongoDB prerequisites
+      run: |
+        kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/Database/serviceaccount.yaml
+        kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/Database/secretstore.yaml
+        kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/Database/externalsecret.yaml
 
     # ---------------- DATABASE ----------------
-    - name: Deploy Database
+    - name: Deploy MongoDB
       run: |
-        kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/Database/secrets.yaml
         kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/Database/pvc.yaml
         kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/Database/deployment.yaml
         kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/Database/service.yaml
