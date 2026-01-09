@@ -47,7 +47,7 @@ jobs:
     - name: Deploy MongoDB prerequisites
       run: |
         kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/Database/serviceaccount.yaml
-        kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/Database/secretstore.yaml
+        kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/Database/secretstore.yaml --validate=false
         kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/Database/externalsecret.yaml
 
     # ---------------- DATABASE ----------------
