@@ -13,84 +13,61 @@ env:
   AWS_REGION: us-east-1
   EKS_CLUSTER_NAME: three-tier
   AWS_ROLE_ARN: arn:aws:iam::323001028681:role/Saransh-EKS-OIDC
+  NAMESPACE: three-tier
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
+    # ---------------- CHECKOUT ----------------
     - name: Checkout code
       uses: actions/checkout@v4
 
-    # ---------------- AUTH ----------------
-    - name: Configure AWS credentials (OIDC)
+    # ---------------- AUTH (OIDC) ----------------
+    - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
         role-to-assume: ${{ env.AWS_ROLE_ARN }}
         aws-region: ${{ env.AWS_REGION }}
 
+    # ---------------- KUBECONFIG ----------------
     - name: Configure kubeconfig
       run: |
         aws eks update-kubeconfig \
           --region $AWS_REGION \
           --name $EKS_CLUSTER_NAME
 
-    # ---------------- TOOLS ----------------
-    - name: Install Helm
+    # ---------------- NAMESPACE ----------------
+    - name: Create namespace
       run: |
-        curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-
-    # ---------------- FETCH VPC ID ----------------
-    - name: Fetch VPC ID
-      run: |
-        VPC_ID=$(aws eks describe-cluster \
-          --name $EKS_CLUSTER_NAME \
-          --region $AWS_REGION \
-          --query "cluster.resourcesVpcConfig.vpcId" \
-          --output text)
-
-        echo "VPC_ID=$VPC_ID" >> $GITHUB_ENV
-        echo "Using VPC ID: $VPC_ID"
-
-    # ---------------- ALB CONTROLLER ----------------
-    - name: Install AWS Load Balancer Controller (VPC ID based)
-      run: |
-        helm repo add eks https://aws.github.io/eks-charts
-        helm repo update
-
-        helm upgrade --install aws-load-balancer-controller eks/aws-load-balancer-controller \
-          -n kube-system \
-          --set clusterName=$EKS_CLUSTER_NAME \
-          --set replicaCount=1 \
-          --set vpcId=$VPC_ID \
-          --set serviceAccount.create=true \
-          --set serviceAccount.name=aws-load-balancer-controller
-
+        kubectl create namespace $NAMESPACE \
+          --dry-run=client -o yaml | kubectl apply -f -
 
     # ---------------- DATABASE ----------------
     - name: Deploy Database
       run: |
-        kubectl apply -f Kubernetes-Manifests-file/Database/secrets.yaml
-        kubectl apply -f Kubernetes-Manifests-file/Database/pvc.yaml
-        kubectl apply -f Kubernetes-Manifests-file/Database/deployment.yaml
-        kubectl apply -f Kubernetes-Manifests-file/Database/service.yaml
+        kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/Database/secrets.yaml
+        kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/Database/pvc.yaml
+        kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/Database/deployment.yaml
+        kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/Database/service.yaml
 
     # ---------------- BACKEND ----------------
     - name: Deploy Backend
       run: |
-        kubectl apply -f Kubernetes-Manifests-file/Backend/deployment.yaml
-        kubectl apply -f Kubernetes-Manifests-file/Backend/service.yaml
-        kubectl rollout status deployment/backend --timeout=300s
+        kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/Backend/deployment.yaml
+        kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/Backend/service.yaml
 
     # ---------------- FRONTEND ----------------
     - name: Deploy Frontend
       run: |
-        kubectl apply -f Kubernetes-Manifests-file/Frontend/deployment.yaml
-        kubectl apply -f Kubernetes-Manifests-file/Frontend/service.yaml
-        kubectl apply -f Kubernetes-Manifests-file/ingress.yaml
-        kubectl rollout status deployment/frontend --timeout=300s
+        kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/Frontend/deployment.yaml
+        kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/Frontend/service.yaml
+        kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/ingress.yaml
 
     # ---------------- VERIFY ----------------
-    - name: Verify Ingress
+    - name: Verify resources
       run: |
-        kubectl get ingress
+        kubectl get pods -n $NAMESPACE
+        kubectl get svc -n $NAMESPACE
+        kubectl get ingress -n $NAMESPACE
