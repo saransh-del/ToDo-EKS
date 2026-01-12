@@ -1,0 +1,7 @@
+resources:
+  - backend
+  - database
+  - frontend
+  - ingress.yaml
+
+namespace: three-tier
