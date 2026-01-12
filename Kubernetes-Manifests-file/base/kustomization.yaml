@@ -7,8 +7,16 @@ commonLabels:
   app: three-tier-app
 
 resources:
-  - Backend
-  - Database
-  - Frontend
+   
+  - Backend/deployment.yaml
+  - Backend/service.yaml
+
+  # Database
+  - Database/pvc.yaml
+  - Database/deployment.yaml
+  - Database/service.yaml
+
+  # Frontend
+  - Frontend/deployment.yaml
+  - Frontend/service.yaml
   - ingress.yaml
-  
