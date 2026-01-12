@@ -1,7 +1,15 @@
-resources:
-  - backend
-  - database
-  - frontend
-  - ingress.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+metadata:
+  name: three-tier-base
 
 namespace: three-tier
+
+commonLabels:
+  app: three-tier-app
+
+resources:
+  - Backend
+  - Database
+  - Frontend
+  - ingress.yaml
