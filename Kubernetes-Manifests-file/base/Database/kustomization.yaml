@@ -5,9 +5,7 @@ commonLabels:
   tier: database
 
 resources:
-  - serviceaccount.yaml
-  - secretstore.yaml
-  - externalsecret.yaml
   - pvc.yaml
   - deployment.yaml
   - service.yaml
+  - secret.yaml

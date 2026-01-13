@@ -15,6 +15,7 @@ resources:
   - Database/pvc.yaml
   - Database/deployment.yaml
   - Database/service.yaml
+  - Database/secret.yaml
 
   # Frontend
   - Frontend/deployment.yaml
